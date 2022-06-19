@@ -57,5 +57,17 @@ public class BoardService {
         boardRepository.deleteById(id);
     }
 
+    public List<BoardDto> searchPosts(String title, String content, Pageable pageable){
+        Page<Board> boards = boardRepository.findByTitleContainingOrContentContaining(title, content, pageable);
+        List<BoardDto> boardList = new ArrayList<>();
+
+        if(boards.isEmpty()) return boardList;
+
+        for(Board board : boards){
+            boardList.add(this.toDto(board));
+            }
+
+        return boardList;
+    }
 
 }

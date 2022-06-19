@@ -35,13 +35,6 @@ public class BoardController {
         return "redirect:/";
     }
 
-    @GetMapping("/")
-    public String list(Model model){
-        List<BoardDto> boardDtoList = boardService.getBoardList();
-        model.addAttribute("postList", boardDtoList);
-        return "board/list";
-    }
-
     @GetMapping("/post/{id}")
         public String detail(@PathVariable("id") Long id, Model model){
             BoardDto boardDto = boardService.postDtl(id);
@@ -79,6 +72,30 @@ public class BoardController {
         model.addAttribute("nowPage", nowPage);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
+        model.addAttribute("totalPages", totalPages);
+
+        return "board/list";
+
+
+    }
+
+    @GetMapping("/search")
+        public String search(@RequestParam(value = "keyword") String keyword,
+                             @PageableDefault(page = 0, size = 5, sort = "id", direction = Sort.Direction.DESC)
+                                    Pageable pageable, Model model){
+        Page<Board> page = boardRepository.findByTitleContainingOrContentContaining(keyword, keyword, pageable);
+        List<BoardDto> boardList = boardService.searchPosts(keyword, keyword, pageable);
+
+        int nowPage = page.getPageable().getPageNumber()+1;
+        int startPage = Math.max(nowPage-4,1);
+        int endPage = Math.min(nowPage+5, page.getTotalPages());
+        int totalPages = page.getTotalPages();
+
+        model.addAttribute("Keyword" , keyword);
+        model.addAttribute("boardList", boardList);
+        model.addAttribute("nowPage", nowPage);
+        model.addAttribute("startPage",startPage);
+        model.addAttribute("endPage",endPage);
         model.addAttribute("totalPages", totalPages);
 
         return "board/list";
